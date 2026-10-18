@@ -183,11 +183,11 @@ int CAS_engine::init(cas_par * cas, molecule * ext_M){
                 exit(EXIT_FAILURE);
             }
             if((N - twoS) % 2 != 0){
-                fprintf(out_stream,"ERROR: DMRG spin sector inconsistent: N=%d and 2S=%d differ in parity\n", N, twoS);
+                fprintf(out_stream,"ERROR: DMRG spin sector is inconsistent: N=%d and 2S=%d differ in parity\n", N, twoS);
                 exit(EXIT_FAILURE);
             }
             if(dsz > twoS){
-                fprintf(out_stream,"ERROR: DMRG spin sector inconsistent: |na-nb|=%d exceeds 2S=%d\n", dsz, twoS);
+                fprintf(out_stream,"ERROR: DMRG spin sector is inconsistent: |na-nb|=%d exceeds 2S=%d\n", dsz, twoS);
                 exit(EXIT_FAILURE);
             }
             if(twoS > N || twoS > 2*n_act - N){
@@ -224,7 +224,7 @@ int CAS_engine::init(cas_par * cas, molecule * ext_M){
             if(cas->w_state_type != 1){
                 if((int)cas->w_state.size() != n_s){
                     fprintf(out_stream,"ERROR: DMRG requires exactly n_s state weights (got %d for n_s=%d);"
-                                       " use `wstate all_1` or give n_s equal positive weights\n",
+                                       " use `wstate all_1` or give n_s equal positive weights\n", // ? or 'wstate equal'
                                        (int)cas->w_state.size(), n_s);
                     exit(EXIT_FAILURE);
                 }
@@ -317,7 +317,7 @@ int CAS_engine::init(cas_par * cas, molecule * ext_M){
     
     rotate_orbs=cas->rotate_orbs;
     if(rotate_orbs && !CI->supports_civec_rotation()){
-        fprintf(out_stream,"WARNING: orbital canonicalization (rotate) disabled - the CI "
+        fprintf(out_stream,"WARNING: orbital canonicalization (rotate) is disabled - the CI "
                            "backend does not support CI-vector rotation\n");
         rotate_orbs=0;
     }
@@ -1417,7 +1417,7 @@ int CAS_SCF(molecule * M, cas_par * cas, char * job_name){
     }
     
     CAS->make_canonical(/*with_active=*/false);
-    printf_timer("Primary CI and calculation canonical orbitals");
+    printf_timer("Primary CI and calculation of canonical orbitals");
 
     
     

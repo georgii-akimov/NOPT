@@ -319,7 +319,7 @@ int aldet_data::get_dim(int ext_n_act, int ext_na, int ext_nb, int ext_n_sets, i
     K_act_b = new double[n_act*n_act*Nb];//????????
 #ifdef TEST_ALDET
 #ifdef DEBUG_WARN
-    fprintf(out_stream,"\n\nWARNING current version (%s) has non-optimal ALDet CI engine - diagonal elements are not skiped!\n\n\n", VERSION);
+    fprintf(out_stream,"\n\nWARNING current version (%s) has non-optimal ALDet CI engine - diagonal elements are not skipped!\n\n\n", VERSION);
 #endif
 #endif
     
@@ -544,7 +544,7 @@ int aldet_data::gen_ext_ind(){
     
     if(import_done==0){
         fprintf(out_stream,"ERROR: in function gen_ext_ind()\n");
-        fprintf(out_stream,"       external references must be set by aldet_data impport function\n");
+        fprintf(out_stream,"       external references must be set by aldet_data import function\n");
         exit(0);
     }
     
@@ -1189,7 +1189,7 @@ int aldet_data::init_zero_vec(int n_s, int i_set){
 int aldet_data::copy_coef(int i_set, aldet_data * C, int n_s, int i_set_inp, int do_transpose){
     
     if(i_set>=n_sets){
-        fprintf(out_stream,"unable to run read_set_from_mol for i_set = %d and n_sets = %d\nfor correct run you nedd^ i < n_sets\n", i_set, n_sets);
+        fprintf(out_stream,"unable to run read_set_from_mol for i_set = %d and n_sets = %d\nfor correct run you need^ i < n_sets\n", i_set, n_sets);
         exit(1);
     }
     if((n_act!=C->n_act)||(na!=C->na)||(nb!=C->nb)){
@@ -1224,7 +1224,7 @@ int aldet_data::copy_coef(int i_set, aldet_data * C, int n_s, int i_set_inp, int
 int aldet_data::read_set_from_ci_map_arr(ci_map_arr * ci, int n_s, int i_set){
     
     if(i_set>=n_sets){
-        fprintf(out_stream,"unable to run read_set_from_ci_map_arr for i_set = %d and n_sets = %d\nfor correct run you nedd: i < n_sets\n", i_set, n_sets);
+        fprintf(out_stream,"unable to run read_set_from_ci_map_arr for i_set = %d and n_sets = %d\nfor correct run you need: i < n_sets\n", i_set, n_sets);
         exit(1);
     }
     
@@ -1336,7 +1336,7 @@ int aldet_data::read_civec(int i_set, char * file_name, std::vector<int> n_st){
 int aldet_data::transpose_ci(int i_set){
 
     if(i_set>=n_sets){
-        fprintf(out_stream,"unable to run transpose_ci for i_set = %d and n_sets = %d\nfor correct run you nedd^ i < n_sets\n", i_set, n_sets);
+        fprintf(out_stream,"unable to run transpose_ci for i_set = %d and n_sets = %d\nfor correct run you need^ i < n_sets\n", i_set, n_sets);
         exit(1);
     }
     
@@ -4216,7 +4216,7 @@ int aldet_data::gen_bf(sparsed_CI_vec * s, int n_s){
 int aldet_data::symmetrization(int i_set){
     
     if(i_set>=n_sets){
-        fprintf(out_stream,"unable to run symmetrization for i_set = %d and n_sets = %d\nfor correct run you nedd^ i < n_sets\n", i_set, n_sets);
+        fprintf(out_stream,"unable to run symmetrization for i_set = %d and n_sets = %d\nfor correct run you need^ i < n_sets\n", i_set, n_sets);
         exit(1);
     }
 
