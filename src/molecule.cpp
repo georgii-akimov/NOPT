@@ -216,6 +216,9 @@ molecule::molecule()
     V_D6   = NULL;
     T_D5   = NULL;
         
+    dS_x_AO = NULL;
+    dS_y_AO = NULL;
+    dS_z_AO = NULL;
 }
 
 molecule::~molecule()
@@ -2263,6 +2266,101 @@ double V_nuc_calc(molecule *a, molecule *b){
     return V;
 }
 
+//// TODO E_nuc_grad_calc
+
+std::vector<double> E_nuc_grad_calc(molecule* a) {
+        // int i, j;
+        // double V_grad = 0.0;
+    std::vector<double> E_nuc_grad(3 * a->n_atoms, 0.0);
+    double cubed_sqrt_R;
+        double prefactor;
+        //     fprintf(out_stream,"n_atoms = %d\n", a->n_atoms); //// FOR DEBUGGING
+        for (int i = 0; i < a->n_atoms; i++)
+            for (int j = i + 1; j < a->n_atoms; j++)
+                if ((a->atom_is_ghost[i] * a->atom_is_ghost[j]) == 0) {
+                    // V += (a->nucl_charges_calc[i] * a->nucl_charges_calc[j]) / dist(a->atom_coord[3 * i], a->atom_coord[3 * i + 1], a->atom_coord[3 * i + 2],
+                    //   a->atom_coord[3 * j], a->atom_coord[3 * j + 1], a->atom_coord[3 * j + 2], 1);
+                    //     fprintf(out_stream,"n_atoms = %d\n", a->n_atoms);
+                    cubed_sqrt_R = std::sqrt(dist(a->atom_coord[3 * i], a->atom_coord[3 * i + 1], a->atom_coord[3 * i + 2],
+                        a->atom_coord[3 * j], a->atom_coord[3 * j + 1], a->atom_coord[3 * j + 2], 1) *
+                        dist(a->atom_coord[3 * i], a->atom_coord[3 * i + 1], a->atom_coord[3 * i + 2],
+                            a->atom_coord[3 * j], a->atom_coord[3 * j + 1], a->atom_coord[3 * j + 2], 1) *
+                        dist(a->atom_coord[3 * i], a->atom_coord[3 * i + 1], a->atom_coord[3 * i + 2],
+                            a->atom_coord[3 * j], a->atom_coord[3 * j + 1], a->atom_coord[3 * j + 2], 1));
+                    prefactor = (a->nucl_charges_calc[i] * a->nucl_charges_calc[j]) / cubed_sqrt_R;
+
+                    double move_x = M->atom_coord[3 * i]     - M->atom_coord[3 * j]    ;
+                    double move_y = M->atom_coord[3 * i + 1] - M->atom_coord[3 * j + 1];
+                    double move_z = M->atom_coord[3 * i + 2] - M->atom_coord[3 * j + 2];
+
+                 // Contribution of force to atom i: +prefactor * (R_i - R_j)
+                    E_nuc_grad[3 * i]     += prefactor * move_x;
+                    E_nuc_grad[3 * i + 1] += prefactor * move_y;
+                    E_nuc_grad[3 * i + 2] += prefactor * move_z;
+
+                    // Contribution to atom j: multiply by (-1)
+                    E_nuc_grad[3 * j]     -= prefactor * move_x;
+                    E_nuc_grad[3 * j + 1] -= prefactor * move_y;
+                    E_nuc_grad[3 * j + 2] -= prefactor * move_z;
+                }
+     return E_nuc_grad;
+}
+
+//// #include <vector>
+//// #include <cmath>
+//// #include "molecule.h" // Ensure the molecule class definition is visible
+//// 
+//// /**
+////  * @brief Computes the nuclear repulsion gradient (dE_nuc/dR) for all atoms.
+////  * @param M Pointer to the molecule object.
+////  * @return A flat vector of size 3 * n_atoms containing the gradient
+////  *         components in the order [g_x(0), g_y(0), g_z(0), g_x(1), ...].
+////  */
+//// std::vector<double> E_nuc_grad_calc(molecule* M)
+//// {
+////     const int n_atoms = M->n_atoms;
+////     std::vector<double> grad(3 * n_atoms, 0.0);
+//// 
+////     // Loop over unique pairs (i < j)
+////     for (int i = 0; i < n_atoms; ++i) {
+////         // Use effective charges to be consistent with the energy expression
+////         const double Zi = M->nucl_charges_calc[i];
+////         if (std::abs(Zi) < 1e-12) continue; // Skip zero-charge centers (optional)
+//// 
+////         for (int j = i + 1; j < n_atoms; ++j) {
+////             const double Zj = M->nucl_charges_calc[j];
+////             if (std::abs(Zj) < 1e-12) continue;
+//// 
+////             // Vector from j to i: R_i - R_j
+////             const double dx = M->atom_coord[3 * i] - M->atom_coord[3 * j];
+////             const double dy = M->atom_coord[3 * i + 1] - M->atom_coord[3 * j + 1];
+////             const double dz = M->atom_coord[3 * i + 2] - M->atom_coord[3 * j + 2];
+//// 
+////             const double r2 = dx * dx + dy * dy + dz * dz;
+////             // Avoid division by zero if atoms are superimposed
+////             if (r2 < 1e-24) continue;
+//// 
+////             const double r = std::sqrt(r2);
+////             const double inv_r3 = 1.0 / (r2 * r); // 1 / r^3
+//// 
+////             // Common factor: Zi * Zj / r^3
+////             const double factor = Zi * Zj * inv_r3;
+//// 
+////             // Contribution to atom i: +factor * (R_i - R_j)
+////             grad[3 * i] += factor * dx;
+////             grad[3 * i + 1] += factor * dy;
+////             grad[3 * i + 2] += factor * dz;
+//// 
+////             // Contribution to atom j: -factor * (R_i - R_j) = +factor * (R_j - R_i)
+////             grad[3 * j] -= factor * dx;
+////             grad[3 * j + 1] -= factor * dy;
+////             grad[3 * j + 2] -= factor * dz;
+////         }
+////     }
+//// 
+////     return grad;
+//// }
+
 double D_nuc_calc(molecule * a, int xyz){
     
     int i;
@@ -3761,7 +3859,7 @@ int molecule::gen_1el_data(){
     Dy_nuc=D_nuc_calc(this,1);
     Dz_nuc=D_nuc_calc(this,2);
     
-    V_nuc-=Dx_nuc*F_x+Dy_nuc*F_y+Dz_nuc*F_z;  ////
+    V_nuc-=Dx_nuc*F_x+Dy_nuc*F_y+Dz_nuc*F_z;  //// external electric field -- used for finite-diff dipoles
 
     calc_d5_n_ao();
     
@@ -3799,6 +3897,58 @@ int molecule::gen_1el_data(){
     
     return 1;
 }
+
+//// TODO - gen 1el gradient data
+
+int molecule::gen_1el_data_gradients() {
+
+    //V_nuc = 0.0;
+    //V_nuc = E_nuc_calc(this);
+    //
+    //Dx_nuc = D_nuc_calc(this, 0);
+    //Dy_nuc = D_nuc_calc(this, 1);
+    //Dz_nuc = D_nuc_calc(this, 2);
+    //
+    //V_nuc -= Dx_nuc * F_x + Dy_nuc * F_y + Dz_nuc * F_z;  //// external electric field -- used for finite-diff dipoles
+    //
+    //calc_d5_n_ao();
+    //
+    //if (PP.size() == 0)
+    //    have_ecp = 0;
+    //else
+    //    have_ecp = 1;
+
+    // alloc_basic(); //// ????
+
+    // if (IS_SYM == 1) {
+    //     make_symmetry();
+    // }
+    // 
+    // if (D5) {
+    //     n_mo = n_ao_d5;
+    //     make_D5_matr();
+    // }
+    // // else{
+    // //     n_mo=n_mo;
+    // // }
+
+    calc_dS_AO();  //// cartesian derivatives of overlap -- see below in molecule.cpp
+    calc_dH_AO();
+    // calc_SM05();
+
+//    calc_D_AO();
+
+    // if (print_dispersion + print_quadrupole) {
+    //     alloc_Q_AO();
+    //     calc_Q_AO();
+    // }
+
+
+
+    return 0;
+}
+
+
 
 
 int molecule::P_calc(){
@@ -4239,6 +4389,25 @@ int molecule::calc_S_AO(){
     
 }
 
+//// TODO overlap derivatives - ADD
+//// TODO - modify proper header to include needed dS_x_AO, dS_y_AO, dS_z_AO
+
+int molecule::calc_dS_AO() {
+
+    if (dS_x_AO == nullptr)dS_x_AO = new double[n_ao * n_ao];
+    if (dS_y_AO == nullptr)dS_y_AO = new double[n_ao * n_ao];
+    if (dS_z_AO == nullptr)dS_z_AO = new double[n_ao * n_ao];
+    set_zero_matr(dS_x_AO, n_ao * n_ao);
+    set_zero_matr(dS_y_AO, n_ao * n_ao);
+    set_zero_matr(dS_z_AO, n_ao * n_ao);
+    AO_1el_from_2shells(dS_x_AO, s, s, n_ao, n_ao, 's', 1);
+    AO_1el_from_2shells(dS_y_AO, s, s, n_ao, n_ao, 's', 2);
+    AO_1el_from_2shells(dS_z_AO, s, s, n_ao, n_ao, 's', 3);
+
+    return 0;
+
+}
+
 int molecule::calc_SM05(){
     
     memcpy(BUF, S_AO, n_ao*n_ao*sizeof(double));
@@ -4378,6 +4547,39 @@ int molecule::calc_H_AO(){
     return 0;
 }
 
+//// TODO derivative of H in AO basis
+
+int molecule::calc_dH_AO() { //// TODO - headers
+
+    // if (backup.h1 == 0) {
+    //     read_H_AO();
+    // }
+    // 
+    // if (backup.h1) {
+////    if (1) {
+        if (dH_x_AO == nullptr)dH_x_AO = new double[n_ao * n_ao];
+        if (dH_y_AO == nullptr)dH_y_AO = new double[n_ao * n_ao];
+        if (dH_z_AO == nullptr)dH_z_AO = new double[n_ao * n_ao];
+        set_zero_matr(dH_x_AO, n_ao * n_ao);
+        set_zero_matr(dH_y_AO, n_ao * n_ao);
+        set_zero_matr(dH_z_AO, n_ao * n_ao);
+        AO_1el_from_2shells(dH_x_AO, s, s, n_ao, n_ao, 't', 1);
+        AO_1el_from_2shells(dH_y_AO, s, s, n_ao, n_ao, 't', 2);
+        AO_1el_from_2shells(dH_z_AO, s, s, n_ao, n_ao, 't', 3);
+        AO_1el_from_2shells(dH_x_AO, s, s, n_ao, n_ao, 'v', 1);
+        AO_1el_from_2shells(dH_y_AO, s, s, n_ao, n_ao, 'v', 2);
+        AO_1el_from_2shells(dH_z_AO, s, s, n_ao, n_ao, 'v', 3);
+
+////    }
+
+
+    if (backup.h1 == 2) {
+        write_H_AO();
+        backup.h1 = 0;
+    }
+
+    return 0;
+}
 
 int molecule::write_H_AO(){
         

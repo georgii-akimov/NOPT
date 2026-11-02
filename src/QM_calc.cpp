@@ -81,7 +81,7 @@ int single_point_calc( inp_par * P, molecule * Qm){
 
     
     if(P->rhf.y)
-        RHF    (Qm,&(P->rhf), P->job_name);
+        RHF    (Qm,&(P->rhf), P->job_name);//// ? TODO add gradients info
     else
         Qm->MO_orth();
     

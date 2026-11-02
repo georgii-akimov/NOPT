@@ -8,6 +8,8 @@
 # include "RI.h"
 # include "sad_guess.h"
 # include "grabbers.h"
+# include "molecule.h"   //// ??? did this for calling gen_1el_data_gradients from molecule.cpp
+                         //// should somehow get rid of it properly - TODO
 
 using std::vector;
 // using libint2::Shell;
@@ -212,15 +214,95 @@ int RHF(molecule * M, rhf_par * rhf, char * job_name){
     
     printf_timer("RHF converged at");
   
-    delete[] BUF ;
+    //// TODO gradient
+    if (RHF_gradient == 1)&&(RI == 0) {
+        fprintf(out_stream, "RHF gradient is now constructing\n");
+        // std::vector<double> V_nuc_grad = 0.0;
+        std::vector<double> V_nuc_grad(3 * M->n_atoms, 0.0);
+        V_nuc_grad = E_nuc_grad_calc(A);
+        fprintf(out_stream, "V_nuc_grad printing");
+        PrintMatr(V_nuc_grad, 3, M->n_atoms, 1);
+        fprintf(out_stream, " ");
+
+        build_W_for_RHF_grad(store_W_for_RHF_grad, M->MO_VEC, n_ao, n_cor, M->orb_energy); //// ?? args
+
+        gen_1el_data_gradients();
+
+
+        //// int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, double* eps, int n_ao, int n_occ)
+        //// DM ////         gen_HF_DM(DM, M->MO_VEC, n_ao, n_cor); int gen_HF_DM(double * DM, double * MO, int n, int n_el)
+
+
+        constructing_RHF_grad(RHF_grad, 
+            M->MO_VEC,
+            );
+        //// 
+    }
+
+
+    if (RHF_gradient == 1) && (RI != 0) {
+        fprintf(out_stream, "RHF gradient is not realized for RI yet\n");
+        //// exit(0);
+    }
+    delete[] BUF;
     delete[] BUF2;
     delete[] F_AO;
-    delete[] DM  ;
+    delete[] DM;
     delete[] name;
-    
-    
+
     return 0;
 }
+
+//// TODO RHF grad without RI
+
+int convolution_of_DM_and_1el_deriv(double* D_x_h_deriv, 
+    double* place_for_DM_from_gen_HF_DM,
+    )
+{
+
+    return 0;
+}
+
+int constructing_RHF_grad(double* place_to_store_RHF_grad_res,
+                          double* place_for_MO,
+    double* place_for_orb_nrgs,
+    int place_for_total_number_of_ao,
+    int place_for_number_of_core_orbs, //// =n_cor =n_occ <- last is unused
+    )
+
+
+//// TODO adding energy-weighted density matrixes for grad of RHF
+
+// W_{mu nu} = sum_i occ[=core] eps_i * C_{mu i} * C_{nu i}
+int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, int n_ao, int n_occ, double* eps) //// n_occ = n_cor, eps = e
+{
+    set_zero_matr(W_for_RHF_grad, n_ao * n_ao); ////    std::fill(W, W + n_ao * n_ao, 0.0); //// filling with zeros
+    for (int i = 0; i < n_occ; i++) {
+        double orb_nrg = eps[i];        //// M->orb_energy
+        for (int mu_ao = 0; mu_ao < n_ao; mu_ao++) {
+            double cmu = MO[mu_ao + i * n_ao];
+            for (int nu_ao = 0; nu_ao < n_ao; nu_ao++) {
+                W[mu_ao + nu_ao * n_ao] += orb_nrg * cmu * MO[nu_ao + i * n_ao];
+            }
+        }
+    }
+    return 0;
+    //// int gen_HF_DM(double* DM, double* MO, int n, int n_el) {
+    //// 
+    ////     set_zero_matr(DM, n * n);
+    //// 
+    ////     for (int k = 0; k < n_el; k++)
+    ////         for (int i = 0; i < n; i++)
+    ////             for (int j = 0; j < n; j++)
+    ////                 DM[i * n + j] += MO[k * n + i] * MO[k * n + j];
+    //// 
+    ////     return 0;
+    //// }
+}
+
+
+//// final formula should be 
+//// sum_1,2 [D_12*h/x] - sum_1,2 [W_12*S/x] + 1/2 * sum_1,2,3,4 [(d_12 * d_34 - 1/2 d_14 * d_23) (12|34)/x] 
 
 #ifdef experimental
 
