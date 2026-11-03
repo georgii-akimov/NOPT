@@ -223,10 +223,15 @@ int RHF(molecule * M, rhf_par * rhf, char * job_name){
         fprintf(out_stream, "V_nuc_grad printing");
         PrintMatr(V_nuc_grad, 3, M->n_atoms, 1);
         fprintf(out_stream, " ");
-
+        fprintf(out_stream, "Construction of energy-weighted density matrix W");
         build_W_for_RHF_grad(store_W_for_RHF_grad, M->MO_VEC, n_ao, n_cor, M->orb_energy); //// ?? args
 
-        gen_1el_data_gradients();
+        //// ???
+        std::vector<double> DhWS_grad(3 * M->n_atoms, 0.0);
+
+        //// ??? DM_to_F_transform;
+
+        //////// gen_1el_data_gradients();
 
 
         //// int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, double* eps, int n_ao, int n_occ)
@@ -236,6 +241,9 @@ int RHF(molecule * M, rhf_par * rhf, char * job_name){
         constructing_RHF_grad(RHF_grad, 
             M->MO_VEC,
             );
+
+        fprintf(out_stream, "RHF gradient printing (including d(V_NN)/d(R) term)")
+        PrintMatr(RHF_grad, 3, M->n_atoms, 1);
         //// 
     }
 
@@ -255,22 +263,6 @@ int RHF(molecule * M, rhf_par * rhf, char * job_name){
 
 //// TODO RHF grad without RI
 
-int convolution_of_DM_and_1el_deriv(double* D_x_h_deriv, 
-    double* place_for_DM_from_gen_HF_DM,
-    )
-{
-
-    return 0;
-}
-
-int constructing_RHF_grad(double* place_to_store_RHF_grad_res,
-                          double* place_for_MO,
-    double* place_for_orb_nrgs,
-    int place_for_total_number_of_ao,
-    int place_for_number_of_core_orbs, //// =n_cor =n_occ <- last is unused
-    )
-
-
 //// TODO adding energy-weighted density matrixes for grad of RHF
 
 // W_{mu nu} = sum_i occ[=core] eps_i * C_{mu i} * C_{nu i}
@@ -282,7 +274,7 @@ int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, int n_ao, int n_occ
         for (int mu_ao = 0; mu_ao < n_ao; mu_ao++) {
             double cmu = MO[mu_ao + i * n_ao];
             for (int nu_ao = 0; nu_ao < n_ao; nu_ao++) {
-                W[mu_ao + nu_ao * n_ao] += orb_nrg * cmu * MO[nu_ao + i * n_ao];
+                W_for_RHF_grad[mu_ao + nu_ao * n_ao] += orb_nrg * cmu * MO[nu_ao + i * n_ao];
             }
         }
     }
@@ -299,6 +291,46 @@ int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, int n_ao, int n_occ
     ////     return 0;
     //// }
 }
+
+int build_DhWS_grad(std::vector<double> for_DhWS_grad,
+    double* place_for_DM_from_gen_HF_DM,
+    double* place_for_dH_x_AO,
+    double* place_for_dH_y_AO,
+    double* place_for_dH_z_AO,
+    double* place_for_W_for_RHF_grad,
+    double* place_for_dS_x_AO,
+    double* place_for_dS_y_AO,
+    double* place_for_dS_z_AO);
+    //// ? no info on atoms centers?
+    //// ???
+    //// a->atom_coord[3 * i] <- from molecule object, no info on shell
+
+    )
+{
+    
+    // for (int i = 0; i < 3 * M->n_atoms; i++) {
+    for (int i = 0; i < M->n_atoms; i++) {
+        /// for (int j = 0; j < 3; j++) {  // get at least 1 coord working
+        for (int mu_ao = 0; mu_ao < n_ao; mu_ao++) {
+            double cmu = MO[mu_ao + i * n_ao];
+            for (int nu_ao = 0; nu_ao < n_ao; nu_ao++) {
+                D_h_deriv[mu_ao + nu_ao * n_ao] += orb_nrg * cmu * MO[nu_ao + i * n_ao];
+
+            }
+        }
+    }
+    return 0;
+}
+
+int constructing_RHF_grad(double* place_to_store_RHF_grad_res,
+                double* place_for_MO,
+                double* place_for_orb_nrgs,
+                int place_for_total_number_of_ao,
+                int place_for_number_of_core_orbs, //// =n_cor =n_occ <- last is unused
+                )
+            {
+
+            }
 
 
 //// final formula should be 

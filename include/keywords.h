@@ -8,6 +8,7 @@ extern vector<const char *>rhf_group_end        ;
 extern vector<const char *>rhf_huckel           ;
 extern vector<const char *>rhf_h_core           ;
 extern vector<const char *>rhf_read             ;
+extern vector<const char *>rhf_gradient			; //// added
 extern vector<const char *>guess_kw             ;
 extern vector<const char *>guess_huckel_kw      ;
 extern vector<const char *>guess_sad_kw         ;

@@ -79,7 +79,7 @@ int main ( int argc , char ** argv )
     
     P.write_info();
     
-    nopt_initialize(P.num_threads);
+    nopt_initialize(P.num_threads); //// ? TODO add gradients info
     molecule_read_by_inp_par(&M,&P);
     
     nopt_engines_link_mol(&M);

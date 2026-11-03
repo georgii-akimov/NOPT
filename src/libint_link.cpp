@@ -27,8 +27,8 @@ std::vector<Engine> q_g_engines;//quadrupole
 std::vector<Engine> r_g_engines;//resolution of identity
 std::vector<Engine> r2g_engines;//resolution of identity
 
-
-int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char E, int r){
+//// char -> char* . did this for derivatives support. will break 
+int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char* E, int r){
     
     std::vector<Engine> * engines;
     
@@ -43,6 +43,11 @@ int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2
     if(E=='d')engines=&d_g_engines;
     if(E=='q')engines=&q_g_engines;
     
+    //// ??? TODO - ifs for derivatives
+    //// this way coords can be obtained in the same way?
+    if (E == 'sder')engines = &s_g_engines_deriv;
+    if (E == 'tder')engines = &t_g_engines_deriv;
+    if (E == 'vder')engines = &v_g_engines_deriv;
     
     double * MP;
     MP = new double[num_threads*(dim1*dim2+64)];

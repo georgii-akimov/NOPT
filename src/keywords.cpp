@@ -24,6 +24,10 @@ vector<const char *>rhf_read{{"read"},
                              {"read_orb"},
                              {"read_orbs"}};
 
+//// TODO - kw for RHF gradient
+
+vector<const char*>rhf_gradient{ { "rhf_nuc_grad" } };
+
 vector<const char *>guess_kw{{"guess"}};
 
 vector<const char *>guess_huckel_kw{{"huckel"}};

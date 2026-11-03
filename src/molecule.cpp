@@ -3888,6 +3888,18 @@ int molecule::gen_1el_data(){
     
     calc_D_AO();
     
+    //// TODO -- add flag for rhf gradient
+
+
+
+    //if () {
+    //
+    //}
+
+    //// dS, dH for AO added
+    calc_dS_AO();
+    calc_dH_AO();
+
     if(print_dispersion+print_quadrupole){
         alloc_Q_AO();
         calc_Q_AO();
@@ -3898,55 +3910,25 @@ int molecule::gen_1el_data(){
     return 1;
 }
 
-//// TODO - gen 1el gradient data
+//// TODO - gen 1el gradient data separately
 
-int molecule::gen_1el_data_gradients() {
-
-    //V_nuc = 0.0;
-    //V_nuc = E_nuc_calc(this);
-    //
-    //Dx_nuc = D_nuc_calc(this, 0);
-    //Dy_nuc = D_nuc_calc(this, 1);
-    //Dz_nuc = D_nuc_calc(this, 2);
-    //
-    //V_nuc -= Dx_nuc * F_x + Dy_nuc * F_y + Dz_nuc * F_z;  //// external electric field -- used for finite-diff dipoles
-    //
-    //calc_d5_n_ao();
-    //
-    //if (PP.size() == 0)
-    //    have_ecp = 0;
-    //else
-    //    have_ecp = 1;
-
-    // alloc_basic(); //// ????
-
-    // if (IS_SYM == 1) {
-    //     make_symmetry();
-    // }
-    // 
-    // if (D5) {
-    //     n_mo = n_ao_d5;
-    //     make_D5_matr();
-    // }
-    // // else{
-    // //     n_mo=n_mo;
-    // // }
-
-    calc_dS_AO();  //// cartesian derivatives of overlap -- see below in molecule.cpp
-    calc_dH_AO();
-    // calc_SM05();
-
-//    calc_D_AO();
-
-    // if (print_dispersion + print_quadrupole) {
-    //     alloc_Q_AO();
-    //     calc_Q_AO();
-    // }
-
-
-
-    return 0;
-}
+//// int molecule::gen_1el_data_gradients() {
+//// 
+////     calc_dS_AO();  //// cartesian derivatives of overlap -- see below in molecule.cpp
+////     calc_dH_AO();
+////     // calc_SM05();
+//// 
+//// //    calc_D_AO();
+//// 
+////     // if (print_dispersion + print_quadrupole) {
+////     //     alloc_Q_AO();
+////     //     calc_Q_AO();
+////     // }
+//// 
+//// 
+//// 
+////     return 0;
+//// }
 
 
 
@@ -4393,16 +4375,25 @@ int molecule::calc_S_AO(){
 //// TODO - modify proper header to include needed dS_x_AO, dS_y_AO, dS_z_AO
 
 int molecule::calc_dS_AO() {
-
-    if (dS_x_AO == nullptr)dS_x_AO = new double[n_ao * n_ao];
-    if (dS_y_AO == nullptr)dS_y_AO = new double[n_ao * n_ao];
-    if (dS_z_AO == nullptr)dS_z_AO = new double[n_ao * n_ao];
-    set_zero_matr(dS_x_AO, n_ao * n_ao);
-    set_zero_matr(dS_y_AO, n_ao * n_ao);
-    set_zero_matr(dS_z_AO, n_ao * n_ao);
-    AO_1el_from_2shells(dS_x_AO, s, s, n_ao, n_ao, 's', 1);
-    AO_1el_from_2shells(dS_y_AO, s, s, n_ao, n_ao, 's', 2);
-    AO_1el_from_2shells(dS_z_AO, s, s, n_ao, n_ao, 's', 3);
+    //// how to get atomic centers?
+    if (dS_x_AO_bra == nullptr)dS_x_AO_bra = new double[n_ao * n_ao];
+    if (dS_y_AO_bra == nullptr)dS_y_AO_bra = new double[n_ao * n_ao];
+    if (dS_z_AO_bra == nullptr)dS_z_AO_bra = new double[n_ao * n_ao];
+    if (dS_x_AO_ket == nullptr)dS_x_AO_ket = new double[n_ao * n_ao];
+    if (dS_y_AO_ket == nullptr)dS_y_AO_ket = new double[n_ao * n_ao];
+    if (dS_z_AO_ket == nullptr)dS_z_AO_ket = new double[n_ao * n_ao];
+    set_zero_matr(dS_x_AO_bra, n_ao * n_ao);
+    set_zero_matr(dS_y_AO_bra, n_ao * n_ao);
+    set_zero_matr(dS_z_AO_bra, n_ao * n_ao);
+    set_zero_matr(dS_x_AO_ket, n_ao * n_ao);
+    set_zero_matr(dS_y_AO_ket, n_ao * n_ao);
+    set_zero_matr(dS_z_AO_ket, n_ao * n_ao);
+    AO_1el_from_2shells(dS_x_AO_bra, s, s, n_ao, n_ao, 'sder', 1);
+    AO_1el_from_2shells(dS_y_AO_bra, s, s, n_ao, n_ao, 'sder', 2);
+    AO_1el_from_2shells(dS_z_AO_bra, s, s, n_ao, n_ao, 'sder', 3);
+    AO_1el_from_2shells(dS_x_AO_ket, s, s, n_ao, n_ao, 'sder', 4);
+    AO_1el_from_2shells(dS_y_AO_ket, s, s, n_ao, n_ao, 'sder', 5);
+    AO_1el_from_2shells(dS_z_AO_ket, s, s, n_ao, n_ao, 'sder', 6);
 
     return 0;
 
@@ -4557,26 +4548,30 @@ int molecule::calc_dH_AO() { //// TODO - headers
     // 
     // if (backup.h1) {
 ////    if (1) {
-        if (dH_x_AO == nullptr)dH_x_AO = new double[n_ao * n_ao];
-        if (dH_y_AO == nullptr)dH_y_AO = new double[n_ao * n_ao];
-        if (dH_z_AO == nullptr)dH_z_AO = new double[n_ao * n_ao];
-        set_zero_matr(dH_x_AO, n_ao * n_ao);
-        set_zero_matr(dH_y_AO, n_ao * n_ao);
-        set_zero_matr(dH_z_AO, n_ao * n_ao);
-        AO_1el_from_2shells(dH_x_AO, s, s, n_ao, n_ao, 't', 1);
-        AO_1el_from_2shells(dH_y_AO, s, s, n_ao, n_ao, 't', 2);
-        AO_1el_from_2shells(dH_z_AO, s, s, n_ao, n_ao, 't', 3);
-        AO_1el_from_2shells(dH_x_AO, s, s, n_ao, n_ao, 'v', 1);
-        AO_1el_from_2shells(dH_y_AO, s, s, n_ao, n_ao, 'v', 2);
-        AO_1el_from_2shells(dH_z_AO, s, s, n_ao, n_ao, 'v', 3);
-
-////    }
-
-
-    if (backup.h1 == 2) {
-        write_H_AO();
-        backup.h1 = 0;
-    }
+        if (dH_x_AO_bra == nullptr)dH_x_AO_bra = new double[n_ao * n_ao];
+        if (dH_y_AO_bra == nullptr)dH_y_AO_bra = new double[n_ao * n_ao];
+        if (dH_z_AO_bra == nullptr)dH_z_AO_bra = new double[n_ao * n_ao];
+        if (dH_x_AO_ket == nullptr)dH_x_AO_ket = new double[n_ao * n_ao];
+        if (dH_y_AO_ket == nullptr)dH_y_AO_ket = new double[n_ao * n_ao];
+        if (dH_z_AO_ket == nullptr)dH_z_AO_ket = new double[n_ao * n_ao];
+        set_zero_matr(dH_x_AO_bra, n_ao * n_ao);
+        set_zero_matr(dH_y_AO_bra, n_ao * n_ao);
+        set_zero_matr(dH_z_AO_bra, n_ao * n_ao);
+        set_zero_matr(dH_x_AO_ket, n_ao * n_ao);
+        set_zero_matr(dH_y_AO_ket, n_ao * n_ao);
+        set_zero_matr(dH_z_AO_ket, n_ao * n_ao);
+        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'tder', 1);
+        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'tder', 2);
+        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'tder', 3);
+        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'tder', 4);
+        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'tder', 5);
+        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'tder', 6);
+        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'vder', 1);
+        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'vder', 2);
+        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'vder', 3);
+        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'vder', 4);
+        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'vder', 5);
+        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'vder', 6);
 
     return 0;
 }

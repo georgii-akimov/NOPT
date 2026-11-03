@@ -30,6 +30,14 @@ extern std::vector<Engine> q_g_engines;//quadrupole
 extern std::vector<Engine> r_g_engines;//resolution of identity 3-center
 extern std::vector<Engine> r2g_engines;//resolution of identity 2-center
 
+//// TODO ??? derivatives
+
+extern std::vector<Engine> s_g_engines_deriv;
+extern std::vector<Engine> t_g_engines_deriv;
+extern std::vector<Engine> v_g_engines_deriv;
+extern std::vector<Engine> e_g_engines_deriv;
+
+
 #ifdef _USE_GRPP
 extern nopt_grpp grpp_engine;//ECP
 #endif
@@ -45,8 +53,19 @@ inline int nopt_engines_initialize(){
     q_g_engines.resize(num_threads);
     t_g_engines.resize(num_threads);
     v_g_engines.resize(num_threads);
-    if(RI==0)
+
+    //// TODO - derivs
+    s_g_engines_deriv.resize(num_threads);
+    t_g_engines_deriv.resize(num_threads);
+    v_g_engines_deriv.resize(num_threads);
+    
+
+
+    if (RI == 0) {
+    //// TODO
         e_g_engines.resize(num_threads);
+        e_g_engines_deriv.resize(num_threads);
+    }
     if(RI==1){
         r_g_engines.resize(num_threads);
         r2g_engines.resize(num_threads);
@@ -61,8 +80,18 @@ inline int nopt_engines_initialize(){
         s_h_engines[i] = Engine(Operator::overlap,GTO_MAX,L_MAX);
         t_g_engines[i] = Engine(Operator::kinetic,GTO_MAX,L_MAX);
         v_g_engines[i] = Engine(Operator::nuclear,GTO_MAX,L_MAX);
-        if(RI==0)
-            e_g_engines[i] = Engine(Operator::coulomb,GTO_MAX,L_MAX);
+        //// TODO - ? getting own engines for derivatives 
+        //// see https://github.com/evaleev/libint/wiki/using-modern-CPlusPlus-API
+        //// "number of 1st derivatives of 2-center integrals = 6, ordered as: d/dx1 d/dy1, d/dz1, d/dx2, d/dy2, d/dz2"
+        s_g_engines_deriv[i] = Engine(Operator::overlap, GTO_MAX, L_MAX, 1);
+        t_g_engines_deriv[i] = Engine(Operator::kinetic, GTO_MAX, L_MAX, 1);
+        v_g_engines_deriv[i] = Engine(Operator::nuclear, GTO_MAX, L_MAX, 1);
+
+        if (RI == 0) {
+            //// TODO
+            e_g_engines[i] = Engine(Operator::coulomb, GTO_MAX, L_MAX);
+            e_g_engines_deriv[i] = = Engine(Operator::coulomb, GTO_MAX, L_MAX, 1);
+        } //// ??? do i hav eto set some params? ^^^
         d_g_engines[i] = Engine(Operator::emultipole1,GTO_MAX,L_MAX);
         d_g_engines[i].set_params(std::array<double,3>{0.0, 0.0, 0.0});
         q_g_engines[i] = Engine(Operator::emultipole2,GTO_MAX,L_MAX);

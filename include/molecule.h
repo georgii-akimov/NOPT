@@ -158,6 +158,10 @@ class molecule
         double * RxP_AO;//1-el coordinate-impulse vector product (3 projections) in atomic basis
         double * BUF;
         
+        double* dS_x_AO; //// TODO - added pointers for cartesian derivatives of overlap
+        double* dS_y_AO;
+        double* dS_z_AO;
+
         double * V_D6;  //                              d6-artifact orbitals
         double * T_D5;  //rotation matrix for excluding d6-artifact orbitals
         
@@ -242,10 +246,14 @@ class molecule
         
         int gen_1el_data();//set parameters --- old function from NOPT-2.x.x
         
+        int gen_1el_data_gradients(); //// TODO ? to call this when RHF gradients are needed
+
         int calc_S_AO();
         int calc_SM05();
         int MO_orth();
         int calc_H_AO();
+
+
         
         int write_H_AO();
         int read_H_AO();
@@ -283,6 +291,9 @@ int mol2_fprint(const char* out_name, molecule * a, molecule * b);
 double E_nuc_calc(molecule *a);
 
 double V_nuc_calc(molecule *a, molecule *b);
+
+//// modified
+std::vector<double> E_nuc_grad_calc(molecule* a);
 
 double D_nuc_calc(molecule * a, int xyz);
 
