@@ -778,7 +778,7 @@ int molecule::basis_print(int t){
         
         int new_sh=0;
         for(int sh_i=0;sh_i<n_s;sh_i++)
-        if(c[sh_i]==i){
+        if(c[sh_i]==i){ //// TODO important - how to get shell center
             if(new_sh)fprintf(out_stream,"|              |---------|-------------------|-------------------|-------------------|\n");
             fprintf(out_stream,"|              |   %3d   |% 18.6f |% 18.6f |% 18.6f |\n",
                                b[sh_i].contr[0].l,b[sh_i].alpha[0],b[sh_i].contr[0].coeff[0],lc[sh_i][0]);
@@ -2289,9 +2289,9 @@ std::vector<double> E_nuc_grad_calc(molecule* a) {
                             a->atom_coord[3 * j], a->atom_coord[3 * j + 1], a->atom_coord[3 * j + 2], 1));
                     prefactor = (a->nucl_charges_calc[i] * a->nucl_charges_calc[j]) / cubed_sqrt_R;
 
-                    double move_x = M->atom_coord[3 * i]     - M->atom_coord[3 * j]    ;
-                    double move_y = M->atom_coord[3 * i + 1] - M->atom_coord[3 * j + 1];
-                    double move_z = M->atom_coord[3 * i + 2] - M->atom_coord[3 * j + 2];
+                    double move_x = a->atom_coord[3 * i]     - a->atom_coord[3 * j]    ;
+                    double move_y = a->atom_coord[3 * i + 1] - a->atom_coord[3 * j + 1];
+                    double move_z = a->atom_coord[3 * i + 2] - a->atom_coord[3 * j + 2];
 
                  // Contribution of force to atom i: +prefactor * (R_i - R_j)
                     E_nuc_grad[3 * i]     += prefactor * move_x;
@@ -4383,17 +4383,17 @@ int molecule::calc_dS_AO() {
     if (dS_y_AO_ket == nullptr)dS_y_AO_ket = new double[n_ao * n_ao];
     if (dS_z_AO_ket == nullptr)dS_z_AO_ket = new double[n_ao * n_ao];
     set_zero_matr(dS_x_AO_bra, n_ao * n_ao);
-    set_zero_matr(dS_y_AO_bra, n_ao * n_ao);
+    set_zero_matr(dS_y_AO_bra, n_ao * n_ao); //// 
     set_zero_matr(dS_z_AO_bra, n_ao * n_ao);
     set_zero_matr(dS_x_AO_ket, n_ao * n_ao);
     set_zero_matr(dS_y_AO_ket, n_ao * n_ao);
     set_zero_matr(dS_z_AO_ket, n_ao * n_ao);
-    AO_1el_from_2shells(dS_x_AO_bra, s, s, n_ao, n_ao, 'sder', 1);
-    AO_1el_from_2shells(dS_y_AO_bra, s, s, n_ao, n_ao, 'sder', 2);
-    AO_1el_from_2shells(dS_z_AO_bra, s, s, n_ao, n_ao, 'sder', 3);
-    AO_1el_from_2shells(dS_x_AO_ket, s, s, n_ao, n_ao, 'sder', 4);
-    AO_1el_from_2shells(dS_y_AO_ket, s, s, n_ao, n_ao, 'sder', 5);
-    AO_1el_from_2shells(dS_z_AO_ket, s, s, n_ao, n_ao, 'sder', 6);
+    AO_1el_from_2shells(dS_x_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 0); //// TODO - fix dH, H, S
+    AO_1el_from_2shells(dS_y_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 1);
+    AO_1el_from_2shells(dS_z_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 2);
+    AO_1el_from_2shells(dS_x_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 3);
+    AO_1el_from_2shells(dS_y_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 4);
+    AO_1el_from_2shells(dS_z_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 5);
 
     return 0;
 
@@ -4560,18 +4560,18 @@ int molecule::calc_dH_AO() { //// TODO - headers
         set_zero_matr(dH_x_AO_ket, n_ao * n_ao);
         set_zero_matr(dH_y_AO_ket, n_ao * n_ao);
         set_zero_matr(dH_z_AO_ket, n_ao * n_ao);
-        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'tder', 1);
-        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'tder', 2);
-        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'tder', 3);
-        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'tder', 4);
-        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'tder', 5);
-        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'tder', 6);
-        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'vder', 1);
-        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'vder', 2);
-        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'vder', 3);
-        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'vder', 4);
-        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'vder', 5);
-        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'vder', 6);
+        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'tder', 0);
+        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'tder', 1);
+        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'tder', 2);
+        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'tder', 3);
+        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'tder', 4);
+        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'tder', 5);
+        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'vder', 0);
+        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'vder', 1);
+        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'vder', 2);
+        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'vder', 3);
+        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'vder', 4);
+        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'vder', 5);
 
     return 0;
 }

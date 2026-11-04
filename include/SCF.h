@@ -8,7 +8,8 @@ int change_orbs(double * V, int i, int j, int dim);
 
 int RHF(molecule * A, rhf_par * rhf, char * job_name);
 
-int build_W_for_RHF_grad(double* W_for_RHF_grad, double* MO, int n_ao, int n_occ, double* eps); //// n_occ = n_cor, eps = e
+int build_W_for_RHF_grad(double* store_W_for_RHF_grad, double* MO, int n_ao, int n_occ, double* eps); //// n_occ = n_cor, eps = e
+
 
 
 #ifdef experimental

@@ -6,7 +6,10 @@
 
 using libint2::Shell;
 
-int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char * E, int r);
+int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char E, int r);
+
+int AO_1el_from_2shells_derivs(double* M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char* E, int r, int deriv_no);
+
 
 int AO_1el_from_shell(double * M, std::vector<Shell> s, int dim, char E, int r);
 

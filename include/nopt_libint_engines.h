@@ -90,8 +90,8 @@ inline int nopt_engines_initialize(){
         if (RI == 0) {
             //// TODO
             e_g_engines[i] = Engine(Operator::coulomb, GTO_MAX, L_MAX);
-            e_g_engines_deriv[i] = = Engine(Operator::coulomb, GTO_MAX, L_MAX, 1);
-        } //// ??? do i hav eto set some params? ^^^
+            e_g_engines_deriv[i] = Engine(Operator::coulomb, GTO_MAX, L_MAX, 1);
+        }
         d_g_engines[i] = Engine(Operator::emultipole1,GTO_MAX,L_MAX);
         d_g_engines[i].set_params(std::array<double,3>{0.0, 0.0, 0.0});
         q_g_engines[i] = Engine(Operator::emultipole2,GTO_MAX,L_MAX);

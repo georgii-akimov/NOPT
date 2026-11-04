@@ -5,7 +5,7 @@ include Makefile.vars
 # MAX_ERRORS:=-ferror-limit=5 from Makefile.vars; EXTRA_LDFLAGS adds link-time search paths/rpaths.
 OMP_FLAGS?=-fopenmp
 OMP_LIBS?=
-MAX_ERRORS?=-fmax-errors=5
+MAX_ERRORS?=-fmax-errors=250
 EXTRA_LDFLAGS?=
 
 progs_cpp:=$(filter %.cpp,$(shell ls src/progs))

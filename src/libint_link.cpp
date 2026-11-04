@@ -27,11 +27,14 @@ std::vector<Engine> q_g_engines;//quadrupole
 std::vector<Engine> r_g_engines;//resolution of identity
 std::vector<Engine> r2g_engines;//resolution of identity
 
-//// char -> char* . did this for derivatives support. will break 
-int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char* E, int r){
-    
+std::vector<Engine> s_g_engines_deriv; //overlap 1st derivative
+std::vector<Engine> t_g_engines_deriv; //kinetic 1st derivative
+std::vector<Engine> v_g_engines_deriv; //NAI 1st derivative
+
+int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char E, int r){
+
     std::vector<Engine> * engines;
-    
+
     if(E=='s')engines=&s_g_engines;
     if(E=='t')engines=&t_g_engines;
     if(E=='v')engines=&v_g_engines;
@@ -42,12 +45,6 @@ int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2
     }
     if(E=='d')engines=&d_g_engines;
     if(E=='q')engines=&q_g_engines;
-    
-    //// ??? TODO - ifs for derivatives
-    //// this way coords can be obtained in the same way?
-    if (E == 'sder')engines = &s_g_engines_deriv;
-    if (E == 'tder')engines = &t_g_engines_deriv;
-    if (E == 'vder')engines = &v_g_engines_deriv;
     
     double * MP;
     MP = new double[num_threads*(dim1*dim2+64)];
@@ -78,7 +75,7 @@ int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2
                         MT[(fi_num+k)*dim2+fj_num+l]=tmp_S[k*(s2[j].contr[0].size())+l];
 //                         MT[(fi_num+k)*dim1+fj_num+l]+=MT[(fi_num+k)*dim1+fj_num+l]
                     }
-                    
+
                 }
                 fj_num+=s2[j].contr[0].size();
             }
@@ -90,6 +87,62 @@ int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2
         for(int j=0; j<num_threads; j++)
             M[i]+=MP[j*(dim1*dim2+64)+i];
         
+    }
+    delete[] MP;
+    return 0;
+}
+
+int AO_1el_from_2shells_derivs(double* M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char* E, int r, int deriv_no) {
+    //// get ind of no of deriv 0 --6 -- last ind
+    std::vector<Engine>* engines;
+    //// !!!! TODO new2 function for derivs ONLY
+
+    //// ??? TODO - ifs for derivatives
+    if (E == "sder")engines = &s_g_engines_deriv;
+    if (E == "tder")engines = &t_g_engines_deriv;
+    if (E == "vder")engines = &v_g_engines_deriv;
+
+    double* MP;
+    MP = new double[num_threads * (dim1 * dim2 + 64)];
+    set_zero_matr(MP, num_threads * (dim1 * dim2 + 64));
+
+#pragma omp parallel 
+    {
+        int fi_num, fj_num;
+        double* __restrict__ MT;//trying restrict??????
+        int thread_id = omp_get_thread_num();
+        MT = MP + thread_id * (dim1 * dim2 + 64);
+        const auto& buf_vec = engines->at(thread_id).results();
+        fi_num = 0;
+        for (int i = 0; i < s1.size(); i++) {
+            fj_num = 0;
+            //fprintf(stderr,"AO[%7d/%7d]  threadid=%7d\r",i,s1.size(),thread_id);
+//             getchar();
+            for (int j = 0; j < s2.size(); j++) {
+                if (((i * s2.size() + j) % num_threads) == thread_id) {
+                    //                     auto deg = (i == j) ? 0.5 : 1.0;
+                    engines->at(thread_id).compute(s1[i], s2[j]);
+                    int first_matr_dim = s1[i].contr[0].size();
+                    int second_matr_dim = s2[j].contr[0].size();
+                    const auto* tmp_S = buf_vec[r] + deriv_no * first_matr_dim * second_matr_dim; //// shifting double* address to get derivs
+                    //                     if (tmp_S == nullptr)
+                    //                         continue;
+                    if (tmp_S != nullptr)
+                        for (int k = 0; k < s1[i].contr[0].size(); k++)
+                            for (int l = 0; l < s2[j].contr[0].size(); l++) {
+                                MT[(fi_num + k) * dim2 + fj_num + l] = tmp_S[k * (s2[j].contr[0].size()) + l];
+                                //                         MT[(fi_num+k)*dim1+fj_num+l]+=MT[(fi_num+k)*dim1+fj_num+l]
+                            }
+
+                }
+                fj_num += s2[j].contr[0].size();
+            }
+            fi_num += s1[i].contr[0].size();
+        }
+    }
+    for (int i = 0; i < dim1 * dim2; i++) {
+        for (int j = 0; j < num_threads; j++)
+            M[i] += MP[j * (dim1 * dim2 + 64) + i];
     }
     delete[] MP;
     return 0;
