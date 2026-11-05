@@ -216,9 +216,14 @@ molecule::molecule()
     V_D6   = NULL;
     T_D5   = NULL;
         
-    dS_x_AO = NULL;
-    dS_y_AO = NULL;
-    dS_z_AO = NULL;
+    dS_x_AO_bra = NULL;
+    dS_y_AO_bra = NULL;
+    dS_z_AO_bra = NULL;
+    dS_x_AO_ket = NULL;
+    dS_y_AO_ket = NULL;
+    dS_z_AO_ket = NULL;
+
+
 }
 
 molecule::~molecule()
@@ -4388,12 +4393,12 @@ int molecule::calc_dS_AO() {
     set_zero_matr(dS_x_AO_ket, n_ao * n_ao);
     set_zero_matr(dS_y_AO_ket, n_ao * n_ao);
     set_zero_matr(dS_z_AO_ket, n_ao * n_ao);
-    AO_1el_from_2shells(dS_x_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 0); //// TODO - fix dH, H, S
-    AO_1el_from_2shells(dS_y_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 1);
-    AO_1el_from_2shells(dS_z_AO_bra, s, s, n_ao, n_ao, 'sder', 0, 2);
-    AO_1el_from_2shells(dS_x_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 3);
-    AO_1el_from_2shells(dS_y_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 4);
-    AO_1el_from_2shells(dS_z_AO_ket, s, s, n_ao, n_ao, 'sder', 0, 5);
+    AO_1el_from_2shells_derivs(dS_x_AO_bra, s, s, n_ao, n_ao, "sder", 0, 0); //// TODO - fix dH, H, S
+    AO_1el_from_2shells_derivs(dS_y_AO_bra, s, s, n_ao, n_ao, "sder", 0, 1);
+    AO_1el_from_2shells_derivs(dS_z_AO_bra, s, s, n_ao, n_ao, "sder", 0, 2);
+    AO_1el_from_2shells_derivs(dS_x_AO_ket, s, s, n_ao, n_ao, "sder", 0, 3);
+    AO_1el_from_2shells_derivs(dS_y_AO_ket, s, s, n_ao, n_ao, "sder", 0, 4);
+    AO_1el_from_2shells_derivs(dS_z_AO_ket, s, s, n_ao, n_ao, "sder", 0, 5);
 
     return 0;
 
@@ -4560,18 +4565,18 @@ int molecule::calc_dH_AO() { //// TODO - headers
         set_zero_matr(dH_x_AO_ket, n_ao * n_ao);
         set_zero_matr(dH_y_AO_ket, n_ao * n_ao);
         set_zero_matr(dH_z_AO_ket, n_ao * n_ao);
-        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'tder', 0);
-        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'tder', 1);
-        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'tder', 2);
-        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'tder', 3);
-        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'tder', 4);
-        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'tder', 5);
-        AO_1el_from_2shells(dH_x_AO_bra, s, s, n_ao, n_ao, 'vder', 0);
-        AO_1el_from_2shells(dH_y_AO_bra, s, s, n_ao, n_ao, 'vder', 1);
-        AO_1el_from_2shells(dH_z_AO_bra, s, s, n_ao, n_ao, 'vder', 2);
-        AO_1el_from_2shells(dH_x_AO_ket, s, s, n_ao, n_ao, 'vder', 3);
-        AO_1el_from_2shells(dH_y_AO_ket, s, s, n_ao, n_ao, 'vder', 4);
-        AO_1el_from_2shells(dH_z_AO_ket, s, s, n_ao, n_ao, 'vder', 5);
+        AO_1el_from_2shells_derivs(dH_x_AO_bra, s, s, n_ao, n_ao, "tder", 0, 0);
+        AO_1el_from_2shells_derivs(dH_y_AO_bra, s, s, n_ao, n_ao, "tder", 0, 1);
+        AO_1el_from_2shells_derivs(dH_z_AO_bra, s, s, n_ao, n_ao, "tder", 0, 2);
+        AO_1el_from_2shells_derivs(dH_x_AO_ket, s, s, n_ao, n_ao, "tder", 0, 3);
+        AO_1el_from_2shells_derivs(dH_y_AO_ket, s, s, n_ao, n_ao, "tder", 0, 4);
+        AO_1el_from_2shells_derivs(dH_z_AO_ket, s, s, n_ao, n_ao, "tder", 0, 5);
+        AO_1el_from_2shells_derivs(dH_x_AO_bra, s, s, n_ao, n_ao, "vder", 0, 0);
+        AO_1el_from_2shells_derivs(dH_y_AO_bra, s, s, n_ao, n_ao, "vder", 0, 1);
+        AO_1el_from_2shells_derivs(dH_z_AO_bra, s, s, n_ao, n_ao, "vder", 0, 2);
+        AO_1el_from_2shells_derivs(dH_x_AO_ket, s, s, n_ao, n_ao, "vder", 0, 3);
+        AO_1el_from_2shells_derivs(dH_y_AO_ket, s, s, n_ao, n_ao, "vder", 0, 4);
+        AO_1el_from_2shells_derivs(dH_z_AO_ket, s, s, n_ao, n_ao, "vder", 0, 5);
 
     return 0;
 }

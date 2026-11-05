@@ -158,9 +158,20 @@ class molecule
         double * RxP_AO;//1-el coordinate-impulse vector product (3 projections) in atomic basis
         double * BUF;
         
-        double* dS_x_AO; //// TODO - added pointers for cartesian derivatives of overlap
-        double* dS_y_AO;
-        double* dS_z_AO;
+        double * dS_x_AO_bra; //// TODO - added pointers for cartesian derivatives of overlap
+        double * dS_y_AO_bra;
+        double * dS_z_AO_bra;
+        double * dS_x_AO_ket;
+        double * dS_y_AO_ket;
+        double * dS_z_AO_ket;
+
+        double * dH_x_AO_bra; //// TODO - added pointers for cartesian derivatives of 1-body operators - kinetic and NAI
+        double * dH_y_AO_bra;
+        double * dH_z_AO_bra;
+        double * dH_x_AO_ket;
+        double * dH_y_AO_ket;
+        double * dH_z_AO_ket;
+
 
         double * V_D6;  //                              d6-artifact orbitals
         double * T_D5;  //rotation matrix for excluding d6-artifact orbitals
@@ -253,8 +264,9 @@ class molecule
         int MO_orth();
         int calc_H_AO();
 
+        int calc_dS_AO();       //// TODO - declare functions to evaluate derivs of 1el integrals
+        int calc_dH_AO();
 
-        
         int write_H_AO();
         int read_H_AO();
         int calc_F_AO  (double * F               , double * DM                 , double c);

@@ -95,65 +95,65 @@ int build_W_for_RHF_grad(double* store_W_for_RHF_grad, double* MO, int n_ao, int
 
 
 
-//// TODO
+//// TODO uncomment
 
-int build_DhWS_grad(std::vector<double> for_DhWS_grad,
-    molecule * M,
-    double* place_for_DM_from_gen_HF_DM,
-    double* place_for_dH_x_AO,
-    double* place_for_dH_y_AO,
-    double* place_for_dH_z_AO,
-    double* place_for_W_for_RHF_grad,
-    double* place_for_dS_x_AO,
-    double* place_for_dS_y_AO,
-    double* place_for_dS_z_AO,
-    int* get_ao_centers)                         ////info on atoms centers?
-    ///
-    //// ???
-    //// a->atom_coord[3 * i] <- from molecule object, no info on shell
-{
-    double* dS_r_bra, dS_r_ket;
-    // for (int i = 0; i < 3 * M->n_atoms; i++) {
-    for (int i = 0; i < M->n_atoms; i++) {
-        for (int j = 0; j < 3; j++) {  // get at least 1 coord working
-            if (j == 0) dS_r_bra = dS_x_bra; //// write dS_x_bra 
-            if (j == 0) dS_r_ket = dS_x_ket; // and so on for y, z
-            //
-            //
-
-            //////////// !!! 
-
-            //// if
-        //// write if for shell centers
-
-            for (int mu_ao = 0; mu_ao < n_ao; mu_ao++) {
-                // declare D_h_deriv
-                double cmu = MO[mu_ao + i * n_ao];
-                for (int nu_ao = 0; nu_ao < n_ao; nu_ao++) {
-                    if (get_ao_centers[mu_ao] == i) {
-                        D_h_deriv[mu_ao + nu_ao * n_ao] += dS_r_bra[mu_ao + nu_ao * n_ao];
-                    }
-                    if (get_ao_centers[nu_ao] == i) {
-                        D_h_deriv[mu_ao + nu_ao * n_ao] += dS_r_ket[mu_ao + nu_ao * n_ao];
-                    }
-                }
-
-
-
-            }
-        }
-        return 0;
-    }
-
-    int constructing_RHF_grad(double* place_to_store_RHF_grad_res,
-        double* place_for_MO,
-        double* place_for_orb_nrgs,
-        int place_for_total_number_of_ao,
-        int place_for_number_of_core_orbs, //// =n_cor =n_occ <- last is unused
-        )
-    {
-
-    }
+  //// int build_DhWS_grad(std::vector<double> for_DhWS_grad,
+  ////     molecule * M,
+  ////     double* place_for_DM_from_gen_HF_DM,
+  ////     double* place_for_dH_x_AO,
+  ////     double* place_for_dH_y_AO,
+  ////     double* place_for_dH_z_AO,
+  ////     double* place_for_W_for_RHF_grad,
+  ////     double* place_for_dS_x_AO,
+  ////     double* place_for_dS_y_AO,
+  ////     double* place_for_dS_z_AO,
+  ////     int* get_ao_centers)                         ////info on atoms centers?
+  ////     ///
+  ////     //// ???
+  ////     //// a->atom_coord[3 * i] <- from molecule object, no info on shell
+  //// {
+  ////     double* dS_r_bra, dS_r_ket;
+  ////     // for (int i = 0; i < 3 * M->n_atoms; i++) {
+  ////     for (int i = 0; i < M->n_atoms; i++) {
+  ////         for (int j = 0; j < 3; j++) {  // get at least 1 coord working
+  ////             if (j == 0) dS_r_bra = dS_x_bra; //// write dS_x_bra 
+  ////             if (j == 0) dS_r_ket = dS_x_ket; // and so on for y, z
+  ////             //
+  ////             //
+  //// 
+  ////             //////////// !!! 
+  //// 
+  ////             //// if
+  ////         //// write if for shell centers
+  //// 
+  ////             for (int mu_ao = 0; mu_ao < n_ao; mu_ao++) {
+  ////                 // declare D_h_deriv
+  ////                 double cmu = MO[mu_ao + i * n_ao];
+  ////                 for (int nu_ao = 0; nu_ao < n_ao; nu_ao++) {
+  ////                     if (get_ao_centers[mu_ao] == i) {
+  ////                         D_h_deriv[mu_ao + nu_ao * n_ao] += dS_r_bra[mu_ao + nu_ao * n_ao];
+  ////                     }
+  ////                     if (get_ao_centers[nu_ao] == i) {
+  ////                         D_h_deriv[mu_ao + nu_ao * n_ao] += dS_r_ket[mu_ao + nu_ao * n_ao];
+  ////                     }
+  ////                 }
+  //// 
+  //// 
+  //// 
+  ////             }
+  ////         }
+  ////         return 0;
+  ////     }
+  //// 
+  ////     int constructing_RHF_grad(double* place_to_store_RHF_grad_res,
+  ////         double* place_for_MO,
+  ////         double* place_for_orb_nrgs,
+  ////         int place_for_total_number_of_ao,
+  ////         int place_for_number_of_core_orbs, //// =n_cor =n_occ <- last is unused
+  ////         )
+  ////     {
+  //// 
+  ////     }
 
 
     //// final formula should be 

@@ -30,6 +30,7 @@ std::vector<Engine> r2g_engines;//resolution of identity
 std::vector<Engine> s_g_engines_deriv; //overlap 1st derivative
 std::vector<Engine> t_g_engines_deriv; //kinetic 1st derivative
 std::vector<Engine> v_g_engines_deriv; //NAI 1st derivative
+std::vector<Engine> e_g_engines_deriv; //ERI 1st derivative
 
 int AO_1el_from_2shells(double * M, std::vector<Shell> s1, std::vector<Shell> s2, int dim1, int dim2, char E, int r){
 
